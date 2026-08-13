@@ -1,0 +1,32 @@
+Package: r4agent
+Title: Benchmark AI Agents and Language Models Against Your Own Cases
+Version: 0.1.0
+Authors@R: c(
+    person("Pawan Rama", "Mali", email = "prm@outlook.in",
+           role = c("aut", "cre", "cph")))
+Description: Runs an agent or language model against a fixed suite of cases and
+    reports whether it is ready for production. Cases carry an expected answer,
+    a slice, and a severity. Results are graded locally, emitted as 'R4SUB'
+    evidence rows through 'r4subcore', scored per slice against thresholds
+    agreed before the run, and compared against a previous run so that a case
+    which used to pass and now fails is visible rather than averaged away.
+    Grading is deliberately deterministic and offline: no model is called to
+    judge another model, which keeps a benchmark reproducible and free.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.2)
+Imports:
+    r4subcore,
+    cli,
+    jsonlite,
+    stats,
+    utils
+Suggests:
+    testthat (>= 3.0.0),
+    yaml,
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
+RoxygenNote: 7.3.3
+URL: https://github.com/R4SUB/r4agent, https://techworks.ai/agent-benchmarking
+BugReports: https://github.com/R4SUB/r4agent/issues
