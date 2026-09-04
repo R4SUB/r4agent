@@ -158,3 +158,7 @@ with the people who know it. This package is what you run afterwards.
 
 MIT. Commercial benchmarking engagements built on this are at
 [techworks.ai/agent-benchmarking](https://techworks.ai/agent-benchmarking).
+
+## Maintained by
+
+R4SUB is part of the open-source work of [TechWorksLab](https://techworkslab.com) - clinical programming and regulatory submissions. Maintainer: Pawan Rama Mali.
