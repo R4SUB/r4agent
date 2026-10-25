@@ -18,7 +18,7 @@ navbar:
       aria-label: GitHub
 
 home:
-  title: "r4agent — Benchmark AI Agents Against Your Own Cases"
+  title: "r4agent: Benchmark AI Agents Against Your Own Cases"
 
 reference:
   - title: "Suite definition"
