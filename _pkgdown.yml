@@ -1,0 +1,54 @@
+url: https://r4sub.github.io/r4agent/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+  bslib:
+    primary: "#2C6DB5"
+
+navbar:
+  bg: light
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    github:
+      icon: fab fa-github
+      href: https://github.com/R4SUB/r4agent
+      aria-label: GitHub
+
+home:
+  title: "r4agent — Benchmark AI Agents Against Your Own Cases"
+
+reference:
+  - title: "Suite definition"
+    contents:
+      - agent_suite
+      - agent_case
+      - agent_thresholds
+      - agent_families
+      - read_agent_suite
+  - title: "Running and scoring"
+    contents:
+      - run_benchmark
+      - score_slices
+      - readiness
+      - consistency
+      - agent_evidence
+  - title: "Comparison and reporting"
+    contents:
+      - diff_runs
+      - report_markdown
+  - title: "Graders"
+    contents:
+      - graders
+      - graders_available
+      - register_grader
+  - title: "Methods"
+    contents:
+      - as.data.frame.r4agent_suite
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with
