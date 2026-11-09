@@ -27,6 +27,7 @@ Suggests:
     knitr,
     rmarkdown
 Config/testthat/edition: 3
+VignetteBuilder: knitr
 RoxygenNote: 7.3.3
 URL: https://r4sub.github.io/r4agent/, https://github.com/R4SUB/r4agent, https://techworks.ai/agent-benchmarking
 BugReports: https://github.com/R4SUB/r4agent/issues
