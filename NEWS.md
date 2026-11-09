@@ -1,5 +1,10 @@
 # r4agent (development version)
 
+- `suite_audit()` lints an `r4agent_suite` for coverage and quality gaps:
+  families or severities with no cases, slices below a minimum case count,
+  cases with no stated `why`, and the absence of abstention or injection
+  coverage. The findings are advisory, carry no severity and change no score
+  or verdict; the audit never runs the suite or calls a model.
 - `write_agent_suite()` serialises an `r4agent_suite` back to the YAML that
   `read_agent_suite()` reads, so a suite built in R round-trips through a file.
   A case whose grader is a function cannot be serialised: it is kept with every
