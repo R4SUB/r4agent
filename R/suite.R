@@ -91,7 +91,19 @@ agent_case <- function(id, input, expect = NULL, family = "task",
 #' @return An object of class `r4agent_suite`.
 #' @export
 agent_suite <- function(...) {
-  cases <- unlist(list(...), recursive = FALSE, use.names = FALSE)
+  # Accept both bare cases and lists of cases. A bare case is itself a list,
+  # so unlist() alone would splice its fields apart; splice only the arguments
+  # that are plain lists and keep each case whole.
+  cases <- list()
+  for (arg in list(...)) {
+    if (inherits(arg, "r4agent_case")) {
+      cases <- c(cases, list(arg))
+    } else if (is.list(arg)) {
+      cases <- c(cases, arg)
+    } else {
+      cases <- c(cases, list(arg))
+    }
+  }
   ok <- vapply(cases, inherits, logical(1), "r4agent_case")
   if (!all(ok)) {
     cli::cli_abort("Every element must be an {.cls r4agent_case}.")
