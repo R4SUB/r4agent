@@ -26,6 +26,87 @@ consistency <- function(run) {
   )
 }
 
+#' Run to run consistency, broken down by slice and severity
+#'
+#' The flat disagreement rate from [consistency()] answers whether a system is
+#' unstable. It does not answer where, and a single number averages a slice that
+#' flickers on every call into one that never does. This reports the same
+#' instability stratified by slice and by severity, so an unstable slice, or
+#' instability concentrated in the critical cases, is visible rather than
+#' diluted.
+#'
+#' A case counts as unstable when it did not return the same verdict on every
+#' repeat, exactly as in [consistency()]; the overall figures here are identical
+#' to that function's. Only the breakdown is added.
+#'
+#' @param run An `r4agent_run` with `repeats` greater than one.
+#' @return A list with the overall disagreement rate and unstable ids (as
+#'   [consistency()] returns), plus `by_slice` and `by_severity` data frames
+#'   giving the case count, unstable count and disagreement rate in each stratum.
+#' @seealso [consistency()]
+#' @export
+#' @examples
+#' suite <- agent_suite(list(
+#'   agent_case("steady", "ping", "ok", slice = "stable", grader = "contains"),
+#'   agent_case("flaky", "toggle", "ok", slice = "shaky", severity = "high",
+#'              grader = "contains")
+#' ))
+#' # A deterministic offline runner that flips its answer for one input.
+#' seen <- new.env()
+#' flip <- function(x) {
+#'   n <- if (exists(x, seen, inherits = FALSE)) get(x, seen) else 0L
+#'   assign(x, n + 1L, seen)
+#'   if (x == "toggle" && (n + 1L) %% 2L == 0L) "no" else "ok"
+#' }
+#' run <- run_benchmark(suite, flip, repeats = 4L, quiet = TRUE)
+#' consistency_strata(run)$by_severity
+consistency_strata <- function(run) {
+  stopifnot(inherits(run, "r4agent_run"))
+  if (run$repeats < 2L) {
+    cli::cli_abort(c("Consistency needs more than one repeat.",
+                     i = "Re-run with {.code repeats = 5}."))
+  }
+  res <- run$results
+  by_case <- split(res$result, res$id)
+  unstable_flag <- vapply(by_case, function(v) length(unique(v)) > 1L, logical(1))
+  ids <- names(by_case)
+
+  meta <- res[!duplicated(res$id), c("id", "slice", "severity")]
+  meta <- meta[match(ids, meta$id), , drop = FALSE]
+  meta$unstable <- unstable_flag
+
+  stratum <- function(key, order_levels = NULL) {
+    keys <- unique(meta[[key]])
+    if (!is.null(order_levels)) {
+      keys <- c(intersect(order_levels, keys), setdiff(keys, order_levels))
+    } else {
+      keys <- sort(keys)
+    }
+    rows <- lapply(keys, function(k) {
+      sel <- meta[[key]] == k
+      n_unstable <- sum(meta$unstable[sel])
+      df <- data.frame(n_cases = sum(sel), unstable = n_unstable,
+                       disagreement = round(n_unstable / sum(sel), 4),
+                       stringsAsFactors = FALSE)
+      df[[key]] <- k
+      df[c(key, "n_cases", "unstable", "disagreement")]
+    })
+    out <- do.call(rbind, rows)
+    rownames(out) <- NULL
+    out
+  }
+  sev_levels <- c("info", "low", "medium", "high", "critical")
+
+  list(
+    disagreement = round(sum(unstable_flag) / length(by_case), 4),
+    unstable = ids[unstable_flag],
+    n_cases = length(by_case),
+    repeats = run$repeats,
+    by_slice = stratum("slice"),
+    by_severity = stratum("severity", sev_levels)
+  )
+}
+
 #' Compare two runs
 #'
 #' The most useful thing a benchmark reports is not the average. It is the

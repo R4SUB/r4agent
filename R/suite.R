@@ -155,6 +155,75 @@ read_agent_suite <- function(path) {
   do.call(agent_suite, list(cases))
 }
 
+#' Write a suite to YAML
+#'
+#' Serialises an `r4agent_suite` back to the YAML that [read_agent_suite()]
+#' reads, so a suite assembled in R can be committed next to the code it tests
+#' and read back unchanged. A suite that uses only built-in or registered
+#' graders by name round trips exactly.
+#'
+#' A grader supplied as a function cannot be written: the file names a grader,
+#' it cannot carry the function's code. Such a case is still written, with every
+#' other field kept (`why`, `severity`, `slice`, `expect` and the rest), and a
+#' warning names it; on the way back in its grader falls to the default.
+#'
+#' @param suite An `r4agent_suite`.
+#' @param path Path to write to, or NULL to return the YAML as a string.
+#' @return The YAML text. Returned invisibly when written to `path`.
+#' @seealso [read_agent_suite()]
+#' @export
+#' @examples
+#' suite <- agent_suite(list(
+#'   agent_case("billing-01", "When is my next invoice due?", "first",
+#'              slice = "billing", grader = "contains",
+#'              why = "Monthly plans bill on the first of the month."),
+#'   agent_case("abstain-01", "Does the plan support SAML on the old portal?",
+#'              family = "grounding", slice = "not answerable",
+#'              severity = "high", grader = "abstain",
+#'              why = "The docs do not say, so the only right answer is to say so.")
+#' ))
+#' cat(write_agent_suite(suite))
+#'
+#' # Round-trips through a file
+#' f <- tempfile(fileext = ".yaml")
+#' write_agent_suite(suite, f)
+#' identical(length(read_agent_suite(f)), length(suite))
+#' unlink(f)
+write_agent_suite <- function(suite, path = NULL) {
+  stopifnot(inherits(suite, "r4agent_suite"))
+  if (!requireNamespace("yaml", quietly = TRUE)) {
+    cli::cli_abort("The {.pkg yaml} package is needed to write a suite file.")
+  }
+  dropped <- character(0)
+  cases <- lapply(suite, function(c) {
+    out <- list(id = c$id, input = c$input)
+    if (!is.null(c$expect)) out$expect <- c$expect
+    out$family <- c$family
+    out$slice <- c$slice
+    out$severity <- c$severity
+    if (is.function(c$grader)) {
+      dropped <<- c(dropped, c$id)
+    } else {
+      out$grader <- c$grader
+    }
+    if (length(c$why) == 1L && !is.na(c$why)) out$why <- c$why
+    if (length(c$context)) out$context <- as.character(c$context)
+    out
+  })
+  if (length(dropped)) {
+    cli::cli_warn(c(
+      "Skipped the grader for {length(dropped)} case{?s} with a function grader.",
+      i = "A function cannot be serialised to YAML; every other field was kept
+           and the grader falls to the default on re-read.",
+      "*" = "Affected: {.val {dropped}}."
+    ))
+  }
+  txt <- yaml::as.yaml(list(cases = cases))
+  if (is.null(path)) return(txt)
+  writeLines(txt, path)
+  invisible(txt)
+}
+
 #' Turn a suite into a data frame
 #'
 #' @param x An `r4agent_suite`.
