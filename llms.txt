@@ -227,3 +227,9 @@ regulatory submissions. Maintainer: Pawan Rama Mali.
 - [`as.data.frame(`*`<r4agent_suite>`*`)`](https://r4sub.github.io/r4agent/reference/as.data.frame.r4agent_suite.md)
   : Turn a suite into a data frame
 
+# Articles
+
+### All vignettes
+
+- [Getting started: benchmark an agent end to
+  end](https://r4sub.github.io/r4agent/articles/getting-started.md):
