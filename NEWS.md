@@ -1,5 +1,14 @@
 # r4agent (development version)
 
+- `write_agent_suite()` serialises an `r4agent_suite` back to the YAML that
+  `read_agent_suite()` reads, so a suite built in R round-trips through a file.
+  A case whose grader is a function cannot be serialised: it is kept with every
+  other field and a warning names it, and its grader falls to the default on
+  re-read.
+- `consistency_strata()` reports run-to-run instability broken down by slice and
+  by severity, so an unstable slice, or instability concentrated in the critical
+  cases, is visible rather than averaged into one flat rate. The existing
+  `consistency()` output is unchanged.
 - `agent_suite()` now accepts bare cases (`agent_suite(case1, case2)`) as well
   as a list of cases, as its documentation already stated; previously a bare
   case was spliced into its fields and rejected.
