@@ -46,6 +46,13 @@ cases:
 nobody can justify is the commonest defect in an evaluation set, and being made
 to write the justification is what surfaces it.
 
+A suite can also be assembled in R and written back out.
+`write_agent_suite(suite, path)` serialises a suite to the same YAML
+`read_agent_suite()` reads, so a suite round-trips through a file; with no
+`path` it returns the YAML as a string. A case whose grader is a function cannot
+be named in a file, so it is written with every other field kept, a warning
+names it, and its grader falls to the default on re-read.
+
 ```r
 library(r4agent)
 
@@ -121,7 +128,10 @@ if the agent obeyed a planted instruction, so a match is a failure.
 **Repeats.** `repeats = 5` runs every case five times. `consistency(run)` reports
 the share of cases that did not return the same verdict every time. A system
 that is right four times in five looks like 0.8 in an average and behaves like a
-coin toss to the person using it.
+coin toss to the person using it. `consistency_strata(run)` breaks the same
+instability down by slice and by severity, so an unstable slice, or instability
+concentrated in the critical cases, is visible rather than diluted into one flat
+rate.
 
 **The diff.** `diff_runs(before, after)` lists what used to pass and now fails.
 Model changes are rarely uniform improvements: a prompt revision fixes a group of
@@ -140,6 +150,15 @@ pull request.
 
 `agent_evidence(run)` emits validated R4SUB evidence rows, so a benchmark can be
 read by the same tooling as the rest of the ecosystem.
+
+## Auditing the suite
+
+`suite_audit(suite)` lints the cases themselves, before a run, for the gaps an
+average never shows: a family or severity no case exercises, a slice too thin to
+support a per-slice verdict, a case with no stated `why`, and the absence of
+abstention or injection coverage. It returns one row per finding and nothing
+else: the findings are advisory, carry no severity, and change no score or
+verdict. It never runs the suite or calls a model.
 
 ## What this is not
 
