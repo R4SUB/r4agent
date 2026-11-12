@@ -141,6 +141,20 @@ everyone is pleased while something you cared about is quietly broken.
 **Critical cases.** A failed `severity = "critical"` case blocks release whatever
 the slice average says. An average cannot express "this one must never happen".
 
+## How sure is the score
+
+A per-slice score is a proportion estimated from a handful of cases, and a
+proportion from a handful of cases is noise with a decimal point. A slice of
+three cases that all passed scores 1.0, and so does a slice of three hundred;
+the verdict treats them identically. `score_confidence(run, thresholds)` puts a
+Wilson confidence interval on each slice and reports two things: whether the
+point score clears the threshold, and whether even the lower bound does. A slice
+that clears on the point estimate but not on the lower bound has not been shown
+to clear, it simply has too few cases to tell. The interval is a closed form, so
+it is reproducible from the run with no resampling and no seed, and it changes no
+score and no verdict: it is an opt-in second look that quantifies the thin-slice
+worry `suite_audit()` can only raise.
+
 ## Reports and evidence
 
 `report_markdown(run, thresholds)` writes the verdict, the per slice table and

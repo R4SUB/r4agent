@@ -188,6 +188,21 @@ test_that("evidence messages are populated only for non-passing cases", {
   expect_match(ev$message[ev$indicator_name == "no"], "expected")
 })
 
+test_that("diff_runs lists regressions most-severe first", {
+  suite <- agent_suite(list(
+    agent_case("low-reg", "a", "1", grader = "contains", severity = "low"),
+    agent_case("crit-reg", "b", "1", grader = "contains", severity = "critical"),
+    agent_case("med-reg", "c", "1", grader = "contains", severity = "medium")
+  ))
+  before <- run_benchmark(suite, function(i) "1", quiet = TRUE)
+  after  <- run_benchmark(suite, function(i) "no", quiet = TRUE)
+  d <- diff_runs(before, after)
+  expect_equal(nrow(d$broke), 3L)
+  # critical must come first, not sort alphabetically to the bottom
+  expect_equal(d$broke$severity, c("critical", "medium", "low"))
+  expect_equal(d$broke$id[1], "crit-reg")
+})
+
 test_that("diff_runs reports cases gone from and added to the new run", {
   before <- run_benchmark(
     agent_suite(list(agent_case("keep", "x", "1", grader = "contains"),

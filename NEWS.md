@@ -1,5 +1,15 @@
 # r4agent (development version)
 
+- `score_confidence()` puts a Wilson confidence interval on each per-slice
+  score, so a slice of three passing cases (point score 1.0) is no longer read
+  the same as a slice of three hundred. Supply `thresholds` and it reports both
+  whether the point score clears the bar and whether even the lower bound does;
+  a slice that clears on the point estimate but not the lower bound has too few
+  cases to claim. The interval is a closed form, deterministic and offline, and
+  the function changes no score and no verdict: `readiness()` is unchanged.
+- `diff_runs()` now lists regressions most-severe first. It had ordered them by
+  the severity string, which sorts alphabetically and pushed a failed critical
+  case to the bottom of the list instead of the top.
 - `suite_audit()` lints an `r4agent_suite` for coverage and quality gaps:
   families or severities with no cases, slices below a minimum case count,
   cases with no stated `why`, and the absence of abstention or injection
