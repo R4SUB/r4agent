@@ -127,7 +127,22 @@ thresholds <- agent_thresholds(
 readiness(run, thresholds)
 ```
 
-## 6. Emit evidence and a report
+## 6. How sure is each slice?
+
+A per-slice score is a proportion estimated from a handful of cases, and the
+verdict above reads a slice of three passing cases exactly like a slice of
+three hundred. `score_confidence()` puts a Wilson confidence interval around
+each slice. With thresholds it also reports whether the point score clears the
+bar (`clears_point`, what `readiness()` uses) and whether even the lower bound
+does (`clears_lower`). A slice that clears on the point estimate but not the
+lower bound has too few cases to claim. It is a closed form, so the bounds are
+reproducible from the run alone, and it changes no score or verdict.
+
+```{r confidence}
+score_confidence(run, thresholds)
+```
+
+## 7. Emit evidence and a report
 
 `agent_evidence()` turns the run into validated R4SUB evidence rows, so a
 benchmark reads through the same tooling as the rest of the ecosystem. The
@@ -146,7 +161,7 @@ case in full, as Markdown that commits next to the results:
 cat(report_markdown(run, thresholds))
 ```
 
-## 7. Repeats, consistency and the diff
+## 8. Repeats, consistency and the diff
 
 Two things people skip. `repeats = 5` runs every case five times, and
 `consistency()` reports the share of cases that did not return the same
