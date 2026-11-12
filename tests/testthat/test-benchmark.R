@@ -124,6 +124,59 @@ test_that("the diff names what broke rather than reporting a delta", {
   expect_equal(nrow(d$fixed), 0L)
 })
 
+test_that("diff_runs orders regressions most severe first across all five levels", {
+  sevs <- c("info", "low", "medium", "high", "critical")
+  suite <- agent_suite(lapply(sevs, function(s)
+    agent_case(s, s, "1", grader = "contains", severity = s)))
+  before <- run_benchmark(suite, function(i) "1", quiet = TRUE)   # all pass
+  after  <- run_benchmark(suite, function(i) "no", quiet = TRUE)  # all break
+  d <- diff_runs(before, after)
+  expect_equal(nrow(d$broke), 5L)
+  expect_equal(d$broke$severity, c("critical", "high", "medium", "low", "info"))
+  expect_equal(nrow(d$fixed), 0L)
+})
+
+test_that("diff_runs puts every critical regression ahead of the rest", {
+  suite <- agent_suite(list(
+    agent_case("c1", "c1", "1", grader = "contains", severity = "critical"),
+    agent_case("c2", "c2", "1", grader = "contains", severity = "critical"),
+    agent_case("m1", "m1", "1", grader = "contains", severity = "medium"),
+    agent_case("h1", "h1", "1", grader = "contains", severity = "high"),
+    agent_case("l1", "l1", "1", grader = "contains", severity = "low")
+  ))
+  before <- run_benchmark(suite, function(i) "1", quiet = TRUE)
+  after  <- run_benchmark(suite, function(i) "no", quiet = TRUE)
+  d <- diff_runs(before, after)
+  expect_equal(nrow(d$broke), 5L)
+  # both criticals occupy the first two rows; no lesser severity slips ahead
+  expect_true(all(d$broke$severity[1:2] == "critical"))
+  expect_equal(d$broke$severity[3], "high")
+  last_crit <- max(which(d$broke$severity == "critical"))
+  first_non_crit <- min(which(d$broke$severity != "critical"))
+  expect_lt(last_crit, first_non_crit)
+})
+
+test_that("diff_runs orders only the regressions and leaves fixes and unchanged intact", {
+  suite <- agent_suite(list(
+    agent_case("keep",   "keep",   "1", grader = "contains", severity = "low"),
+    agent_case("brk_lo", "brk_lo", "1", grader = "contains", severity = "low"),
+    agent_case("brk_hi", "brk_hi", "1", grader = "contains", severity = "critical"),
+    agent_case("fix1",   "fix1",   "1", grader = "contains", severity = "high")
+  ))
+  # before: keep + brk_* pass, fix1 fails
+  before <- run_benchmark(suite,
+    function(i) if (i == "fix1") "no" else "1", quiet = TRUE)
+  # after: keep passes, brk_* fail, fix1 passes
+  after <- run_benchmark(suite,
+    function(i) if (i %in% c("brk_lo", "brk_hi")) "no" else "1", quiet = TRUE)
+  d <- diff_runs(before, after)
+  expect_equal(nrow(d$broke), 2L)
+  expect_equal(d$broke$severity, c("critical", "low"))  # critical regression first
+  expect_equal(d$broke$id, c("brk_hi", "brk_lo"))
+  expect_equal(d$fixed$id, "fix1")
+  expect_equal(d$unchanged, 1L)   # only "keep"
+})
+
 test_that("consistency needs repeats and finds an unstable case", {
   suite <- agent_suite(list(agent_case("flip", "x", "1", grader = "contains")))
   one <- run_benchmark(suite, function(i) "1", quiet = TRUE)
