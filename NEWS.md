@@ -1,5 +1,13 @@
 # r4agent (development version)
 
+- `agent_agreement()` reports inter-run reliability from a run with repeats:
+  overall percent agreement (mean pairwise), Cohen's kappa for two runs or
+  Fleiss' kappa for three or more, and a per-case breakdown ordered with the
+  least-agreeing cases first. Where `consistency()` gives a raw disagreement
+  rate and `score_confidence()` bounds a single run's score, this is the
+  chance-corrected agreement across repeated runs. Textbook formulas (Cohen
+  1960, Fleiss 1971) with the Landis & Koch (1977) strength label cited in the
+  help; it calls no model and changes no score or verdict.
 - `score_confidence()` puts a Wilson confidence interval on each per-slice
   score, so a slice of three passing cases (point score 1.0) is no longer read
   the same as a slice of three hundred. Supply `thresholds` and it reports both
