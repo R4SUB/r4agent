@@ -131,8 +131,15 @@ diff_runs <- function(before, after, rep = 1L) {
   broke <- m[m$result_before == "pass" & m$result_after != "pass", , drop = FALSE]
   fixed <- m[m$result_before != "pass" & m$result_after == "pass", , drop = FALSE]
 
+  # Order the regressions by severity rank, most severe first. Ordering on the
+  # bare string would sort alphabetically, which puts "critical" last; a release
+  # blocker belongs at the top of the list, not the bottom.
+  sev_levels <- c("info", "low", "medium", "high", "critical")
+  broke <- broke[order(match(broke$severity, sev_levels), decreasing = TRUE), ,
+                 drop = FALSE]
+
   structure(list(
-    broke = broke[order(broke$severity, decreasing = TRUE), , drop = FALSE],
+    broke = broke,
     fixed = fixed,
     unchanged = nrow(m) - nrow(broke) - nrow(fixed),
     gone = setdiff(b$id, a$id),
