@@ -28,6 +28,7 @@ reference:
       - agent_thresholds
       - agent_families
       - read_agent_suite
+      - write_agent_suite
   - title: "Running and scoring"
     contents:
       - run_benchmark
@@ -35,11 +36,14 @@ reference:
       - score_confidence
       - readiness
       - consistency
+      - consistency_strata
       - agent_evidence
   - title: "Comparison and reporting"
     contents:
       - diff_runs
       - report_markdown
+      - agent_agreement
+      - suite_audit
   - title: "Graders"
     contents:
       - graders
