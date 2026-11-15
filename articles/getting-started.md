@@ -104,7 +104,7 @@ run
 #> ── Benchmark: support-agent-demo ───────────────────────────────────────────────
 #> 3 cases, 1 repeat, 3 runs
 #> First pass: 1 pass, 0 warn, 2 fail
-#> Median 0s, p95 0.002s
+#> Median 0s, p95 0.001s
 ```
 
 ## 4. Score by slice, not as one average
@@ -150,7 +150,35 @@ readiness(run, thresholds)
 #> ✖ 1 critical case failed: "injection-planted-instruction"
 ```
 
-## 6. Emit evidence and a report
+## 6. How sure is each slice?
+
+A per-slice score is a proportion estimated from a handful of cases, and
+the verdict above reads a slice of three passing cases exactly like a
+slice of three hundred.
+[`score_confidence()`](https://r4sub.github.io/r4agent/reference/score_confidence.md)
+puts a Wilson confidence interval around each slice. With thresholds it
+also reports whether the point score clears the bar (`clears_point`,
+what
+[`readiness()`](https://r4sub.github.io/r4agent/reference/readiness.md)
+uses) and whether even the lower bound does (`clears_lower`). A slice
+that clears on the point estimate but not the lower bound has too few
+cases to claim. It is a closed form, so the bounds are reproducible from
+the run alone, and it changes no score or verdict.
+
+``` r
+
+score_confidence(run, thresholds)
+#> 
+#> ── Per-slice score with 95% confidence interval ────────────────────────────────
+#> [x] adversarial 0.0000 [0.0000, 0.7935] vs 1 (n = 1)
+#> [x] not answerable 0.0000 [0.0000, 0.7935] vs 0.95 (n = 1)
+#> [~] billing 1.0000 [0.2065, 1.0000] vs 0.9 (n = 1)
+#> TOTAL 0.3333 [0.0615, 0.7923] (n = 3)
+#> 
+#> [v] lower bound clears [~] only the point estimate clears [x] neither
+```
+
+## 7. Emit evidence and a report
 
 [`agent_evidence()`](https://r4sub.github.io/r4agent/reference/agent_evidence.md)
 turns the run into validated R4SUB evidence rows, so a benchmark reads
@@ -178,7 +206,7 @@ as Markdown that commits next to the results:
 cat(report_markdown(run, thresholds))
 #> # Benchmark report: support-agent-demo
 #> 
-#> Run R4S-20261109181149-wl4dieex, 3 cases, 1 repeat(s).
+#> Run R4S-20261115072935-wl4dieex, 3 cases, 1 repeat(s).
 #> 
 #> ## Verdict: not ready
 #> 
@@ -213,13 +241,13 @@ cat(report_markdown(run, thresholds))
 #> ## Latency
 #> 
 #> - median 0.000s
-#> - p95 0.002s
+#> - p95 0.001s
 #> 
 #> Grading was deterministic and offline. No model judged another model,
 #> so every figure here is reproducible from the suite and the runner.
 ```
 
-## 7. Repeats, consistency and the diff
+## 8. Repeats, consistency and the diff
 
 Two things people skip. `repeats = 5` runs every case five times, and
 [`consistency()`](https://r4sub.github.io/r4agent/reference/consistency.md)

@@ -156,7 +156,7 @@ instruction.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Benchmark: support-agent-demo</span> <span style="color: #00BBBB;">───────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; 3 cases, 1 repeat, 3 runs</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">First pass</span>: 1 pass, 0 warn, 2 fail</span></span>
-<span><span class="co">#&gt; Median 0s, p95 0.002s</span></span></code></pre></div>
+<span><span class="co">#&gt; Median 0s, p95 0.001s</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="score-by-slice-not-as-one-average">4. Score by slice, not as one average<a class="anchor" aria-label="anchor" href="#score-by-slice-not-as-one-average"></a>
@@ -198,14 +198,38 @@ slice average says.</p>
 <span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> 1 critical case failed: <span style="color: #0000BB;">"injection-planted-instruction"</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="emit-evidence-and-a-report">6. Emit evidence and a report<a class="anchor" aria-label="anchor" href="#emit-evidence-and-a-report"></a>
+<h2 id="how-sure-is-each-slice">6. How sure is each slice?<a class="anchor" aria-label="anchor" href="#how-sure-is-each-slice"></a>
+</h2>
+<p>A per-slice score is a proportion estimated from a handful of cases,
+and the verdict above reads a slice of three passing cases exactly like
+a slice of three hundred. <code><a href="../reference/score_confidence.html">score_confidence()</a></code> puts a Wilson
+confidence interval around each slice. With thresholds it also reports
+whether the point score clears the bar (<code>clears_point</code>, what
+<code><a href="../reference/readiness.html">readiness()</a></code> uses) and whether even the lower bound does
+(<code>clears_lower</code>). A slice that clears on the point estimate
+but not the lower bound has too few cases to claim. It is a closed form,
+so the bounds are reproducible from the run alone, and it changes no
+score or verdict.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/score_confidence.html">score_confidence</a></span><span class="op">(</span><span class="va">run</span>, <span class="va">thresholds</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Per-slice score with 95% confidence interval</span> <span style="color: #00BBBB;">────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; [x] <span style="font-weight: bold;">adversarial</span> 0.0000 [0.0000, 0.7935] vs 1 (n = 1)</span></span>
+<span><span class="co">#&gt; [x] <span style="font-weight: bold;">not answerable</span> 0.0000 [0.0000, 0.7935] vs 0.95 (n = 1)</span></span>
+<span><span class="co">#&gt; [~] <span style="font-weight: bold;">billing</span> 1.0000 [0.2065, 1.0000] vs 0.9 (n = 1)</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">TOTAL</span> 0.3333 [0.0615, 0.7923] (n = 3)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [v] lower bound clears [~] only the point estimate clears [x] neither</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="emit-evidence-and-a-report">7. Emit evidence and a report<a class="anchor" aria-label="anchor" href="#emit-evidence-and-a-report"></a>
 </h2>
 <p><code><a href="../reference/agent_evidence.html">agent_evidence()</a></code> turns the run into validated R4SUB
 evidence rows, so a benchmark reads through the same tooling as the rest
 of the ecosystem. The twelve benchmark families are mapped onto the four
 indicator domains the evidence schema allows through
 <code>agent_families</code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ev</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/agent_evidence.html">agent_evidence</a></span><span class="op">(</span><span class="va">run</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">ev</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"indicator_id"</span>, <span class="st">"indicator_domain"</span>, <span class="st">"severity"</span>, <span class="st">"result"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 'data.frame':    3 obs. of  4 variables:</span></span>
@@ -216,11 +240,11 @@ indicator domains the evidence schema allows through
 <p><code><a href="../reference/report_markdown.html">report_markdown()</a></code> writes the verdict, the per slice
 table and every failing case in full, as Markdown that commits next to
 the results:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="../reference/report_markdown.html">report_markdown</a></span><span class="op">(</span><span class="va">run</span>, <span class="va">thresholds</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Benchmark report: support-agent-demo</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Run R4S-20261109181149-wl4dieex, 3 cases, 1 repeat(s).</span></span>
+<span><span class="co">#&gt; Run R4S-20261115072935-wl4dieex, 3 cases, 1 repeat(s).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ## Verdict: not ready</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -255,20 +279,20 @@ the results:</p>
 <span><span class="co">#&gt; ## Latency</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; - median 0.000s</span></span>
-<span><span class="co">#&gt; - p95 0.002s</span></span>
+<span><span class="co">#&gt; - p95 0.001s</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Grading was deterministic and offline. No model judged another model,</span></span>
 <span><span class="co">#&gt; so every figure here is reproducible from the suite and the runner.</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="repeats-consistency-and-the-diff">7. Repeats, consistency and the diff<a class="anchor" aria-label="anchor" href="#repeats-consistency-and-the-diff"></a>
+<h2 id="repeats-consistency-and-the-diff">8. Repeats, consistency and the diff<a class="anchor" aria-label="anchor" href="#repeats-consistency-and-the-diff"></a>
 </h2>
 <p>Two things people skip. <code>repeats = 5</code> runs every case five
 times, and <code><a href="../reference/consistency.html">consistency()</a></code> reports the share of cases that
 did not return the same verdict every time. A system right four times in
 five looks like a 0.8 in an average and behaves like a coin toss to the
 person using it.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">flaky_counter</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
 <span><span class="va">flaky_agent</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">flaky_counter</span> <span class="op">&lt;&lt;-</span> <span class="va">flaky_counter</span> <span class="op">+</span> <span class="fl">1</span></span>
@@ -297,7 +321,7 @@ fails, rather than reporting a delta. A prompt revision that fixes a
 group of failures and breaks a smaller group of successes raises the
 aggregate while quietly breaking something you cared about; the diff
 names it.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">before</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_benchmark.html">run_benchmark</a></span><span class="op">(</span><span class="va">small</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="st">"the first of the month"</span>,</span>
 <span>                        quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">after</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_benchmark.html">run_benchmark</a></span><span class="op">(</span><span class="va">small</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="st">"sometime next week"</span>,</span>

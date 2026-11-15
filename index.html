@@ -83,6 +83,7 @@
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="at">    </span><span class="fu">why</span><span class="kw">:</span><span class="at"> The documentation says nothing about SAML on the legacy portal,</span></span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="at">         so the only correct answer is to say so.</span></span></code></pre></div>
 <p><code>why</code> is required by convention, not by the parser. A case whose expected answer nobody can justify is the commonest defect in an evaluation set, and being made to write the justification is what surfaces it.</p>
+<p>A suite can also be assembled in R and written back out. <code>write_agent_suite(suite, path)</code> serialises a suite to the same YAML <code><a href="reference/read_agent_suite.html">read_agent_suite()</a></code> reads, so a suite round-trips through a file; with no <code>path</code> it returns the YAML as a string. A case whose grader is a function cannot be named in a file, so it is written with every other field kept, a warning names it, and its grader falls to the default on re-read.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r4sub.github.io/r4agent/">r4agent</a></span><span class="op">)</span></span>
 <span></span>
@@ -160,15 +161,25 @@ Overall 0.4. The overall figure is the least useful number here.
 <div class="section level2">
 <h2 id="the-parts-people-skip">The parts people skip<a class="anchor" aria-label="anchor" href="#the-parts-people-skip"></a>
 </h2>
-<p><strong>Repeats.</strong> <code>repeats = 5</code> runs every case five times. <code>consistency(run)</code> reports the share of cases that did not return the same verdict every time. A system that is right four times in five looks like 0.8 in an average and behaves like a coin toss to the person using it.</p>
+<p><strong>Repeats.</strong> <code>repeats = 5</code> runs every case five times. <code>consistency(run)</code> reports the share of cases that did not return the same verdict every time. A system that is right four times in five looks like 0.8 in an average and behaves like a coin toss to the person using it. <code>consistency_strata(run)</code> breaks the same instability down by slice and by severity, so an unstable slice, or instability concentrated in the critical cases, is visible rather than diluted into one flat rate.</p>
 <p><strong>The diff.</strong> <code>diff_runs(before, after)</code> lists what used to pass and now fails. Model changes are rarely uniform improvements: a prompt revision fixes a group of failures and breaks a smaller group of successes, the aggregate rises, and everyone is pleased while something you cared about is quietly broken.</p>
 <p><strong>Critical cases.</strong> A failed <code>severity = "critical"</code> case blocks release whatever the slice average says. An average cannot express “this one must never happen”.</p>
+</div>
+<div class="section level2">
+<h2 id="how-sure-is-the-score">How sure is the score<a class="anchor" aria-label="anchor" href="#how-sure-is-the-score"></a>
+</h2>
+<p>A per-slice score is a proportion estimated from a handful of cases, and a proportion from a handful of cases is noise with a decimal point. A slice of three cases that all passed scores 1.0, and so does a slice of three hundred; the verdict treats them identically. <code>score_confidence(run, thresholds)</code> puts a Wilson confidence interval on each slice and reports two things: whether the point score clears the threshold, and whether even the lower bound does. A slice that clears on the point estimate but not on the lower bound has not been shown to clear, it simply has too few cases to tell. The interval is a closed form, so it is reproducible from the run with no resampling and no seed, and it changes no score and no verdict: it is an opt-in second look that quantifies the thin-slice worry <code><a href="reference/suite_audit.html">suite_audit()</a></code> can only raise.</p>
 </div>
 <div class="section level2">
 <h2 id="reports-and-evidence">Reports and evidence<a class="anchor" aria-label="anchor" href="#reports-and-evidence"></a>
 </h2>
 <p><code>report_markdown(run, thresholds)</code> writes the verdict, the per slice table and every failing case in full, with the input, the output and why the expected answer was right. Markdown, so it commits next to the results and reads in a pull request.</p>
 <p><code>agent_evidence(run)</code> emits validated R4SUB evidence rows, so a benchmark can be read by the same tooling as the rest of the ecosystem.</p>
+</div>
+<div class="section level2">
+<h2 id="auditing-the-suite">Auditing the suite<a class="anchor" aria-label="anchor" href="#auditing-the-suite"></a>
+</h2>
+<p><code>suite_audit(suite)</code> lints the cases themselves, before a run, for the gaps an average never shows: a family or severity no case exercises, a slice too thin to support a per-slice verdict, a case with no stated <code>why</code>, and the absence of abstention or injection coverage. It returns one row per finding and nothing else: the findings are advisory, carry no severity, and change no score or verdict. It never runs the suite or calls a model.</p>
 </div>
 <div class="section level2">
 <h2 id="what-this-is-not">What this is not<a class="anchor" aria-label="anchor" href="#what-this-is-not"></a>

@@ -6,6 +6,7 @@
 <url><loc>https://r4sub.github.io/r4agent/authors.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/index.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/news/index.html</loc></url>
+<url><loc>https://r4sub.github.io/r4agent/reference/agent_agreement.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/agent_case.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/agent_evidence.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/agent_families.html</loc></url>
@@ -13,6 +14,7 @@
 <url><loc>https://r4sub.github.io/r4agent/reference/agent_thresholds.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/as.data.frame.r4agent_suite.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/consistency.html</loc></url>
+<url><loc>https://r4sub.github.io/r4agent/reference/consistency_strata.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/diff_runs.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/graders.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/graders_available.html</loc></url>
@@ -22,6 +24,9 @@
 <url><loc>https://r4sub.github.io/r4agent/reference/register_grader.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/report_markdown.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/run_benchmark.html</loc></url>
+<url><loc>https://r4sub.github.io/r4agent/reference/score_confidence.html</loc></url>
 <url><loc>https://r4sub.github.io/r4agent/reference/score_slices.html</loc></url>
+<url><loc>https://r4sub.github.io/r4agent/reference/suite_audit.html</loc></url>
+<url><loc>https://r4sub.github.io/r4agent/reference/write_agent_suite.html</loc></url>
 </urlset>
 

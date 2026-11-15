@@ -13,6 +13,8 @@
   schema
 - [`read_agent_suite()`](https://r4sub.github.io/r4agent/reference/read_agent_suite.md)
   : Read a suite from YAML
+- [`write_agent_suite()`](https://r4sub.github.io/r4agent/reference/write_agent_suite.md)
+  : Write a suite to YAML
 
 ## Running and scoring
 
@@ -20,10 +22,14 @@
   : Run a benchmark
 - [`score_slices()`](https://r4sub.github.io/r4agent/reference/score_slices.md)
   : Score a run by slice
+- [`score_confidence()`](https://r4sub.github.io/r4agent/reference/score_confidence.md)
+  : Confidence intervals on the per-slice scores
 - [`readiness()`](https://r4sub.github.io/r4agent/reference/readiness.md)
   : Decide whether the system is ready
 - [`consistency()`](https://r4sub.github.io/r4agent/reference/consistency.md)
   : Run to run consistency
+- [`consistency_strata()`](https://r4sub.github.io/r4agent/reference/consistency_strata.md)
+  : Run to run consistency, broken down by slice and severity
 - [`agent_evidence()`](https://r4sub.github.io/r4agent/reference/agent_evidence.md)
   : Convert a run to R4SUB evidence
 
@@ -33,6 +39,10 @@
   : Compare two runs
 - [`report_markdown()`](https://r4sub.github.io/r4agent/reference/report_markdown.md)
   : Write the report
+- [`agent_agreement()`](https://r4sub.github.io/r4agent/reference/agent_agreement.md)
+  : Inter-run agreement and reliability
+- [`suite_audit()`](https://r4sub.github.io/r4agent/reference/suite_audit.md)
+  : Audit a suite for coverage and quality gaps
 
 ## Graders
 
